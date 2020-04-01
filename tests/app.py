@@ -1,4 +1,3 @@
-from graphql import GraphQLCachedBackend
 from quart import Quart
 
 from quart_graphql import AsyncGraphQLView

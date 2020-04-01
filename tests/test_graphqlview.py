@@ -7,7 +7,7 @@ import pytest
 from quart import Quart, Response, url_for
 from quart.testing import QuartClient
 
-from .app import create_app
+from tests.app import create_app
 
 
 @pytest.fixture
