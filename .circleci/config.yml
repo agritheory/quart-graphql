@@ -1,0 +1,14 @@
+version: 2.1
+jobs:
+  build:
+    working_directory: ~/quart_graphql_ci
+    docker:
+      - image: circleci/python:3.8
+    steps:
+      - checkout
+
+      - run:
+          command: |
+            sudo pip install poetry
+            poetry install
+            poetry run python -m pytest tests/ -p no:warnings --cov=quart_graphql tests/
