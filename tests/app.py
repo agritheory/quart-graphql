@@ -1,7 +1,9 @@
-from quart import Quart
-from quart_graphql import AsyncGraphQLView
-from .schema import Schema
 from graphql import GraphQLCachedBackend
+from quart import Quart
+
+from quart_graphql import AsyncGraphQLView
+
+from .schema import Schema
 
 
 def create_app(path="/graphql", **kwargs):

@@ -1,17 +1,11 @@
 from functools import partial
 
+from graphql.type.schema import GraphQLSchema
+from graphql_server import (HttpQueryError, default_format_error,
+                            encode_execution_results, json_encode,
+                            load_json_body, run_http_query)
 from quart import Response, request
 from quart.views import View
-
-from graphql.type.schema import GraphQLSchema
-from graphql_server import (
-    HttpQueryError,
-    default_format_error,
-    encode_execution_results,
-    json_encode,
-    load_json_body,
-    run_http_query,
-)
 
 from .render_graphiql import render_graphiql
 

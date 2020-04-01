@@ -1,13 +1,13 @@
-import pytest
-
 import json
+import typing
 from io import StringIO
 from urllib.parse import urlencode
-import typing
+
+import pytest
+from quart import Quart, Response, url_for
+from quart.testing import QuartClient
 
 from .app import create_app
-from quart import Quart, url_for, Response
-from quart.testing import QuartClient
 
 
 @pytest.fixture

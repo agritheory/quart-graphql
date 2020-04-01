@@ -1,10 +1,10 @@
-import pytest
 import typing
 
-
-from .app import create_app
+import pytest
 from quart import Quart, url_for
 from quart.testing import QuartClient
+
+from .app import create_app
 
 
 @pytest.fixture
