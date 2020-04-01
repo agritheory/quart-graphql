@@ -1,40 +1,70 @@
-import quart.flask_patch
 import pytest
+import typing
+
 
 from .app import create_app
-from quart import url_for
+from quart import Quart, url_for
+from quart.testing import QuartClient
 
 
 @pytest.fixture
-def app():
-    return create_app(graphiql=True)
+async def app() -> Quart:
+    app = create_app(graphiql=True)
+    ctx = app.app_context()
+    await ctx.push()
+    return app
 
 
-def test_graphiql_is_enabled(client):
-    response = client.get(url_for('graphql'), headers={'Accept': 'text/html'})
+@pytest.fixture
+def client(app: Quart) -> QuartClient:
+    return app.test_client()
+
+
+@pytest.mark.asyncio
+async def test_graphiql_is_enabled(app: Quart, client: QuartClient) -> typing.NoReturn:
+    async with app.test_request_context("/"):
+        response = await client.get(
+            url_for("graphql", externals=False), headers={"Accept": "text/html"}
+        )
     assert response.status_code == 200
 
 
-def test_graphiql_renders_pretty(client):
-    response = client.get(url_for('graphql', query='{test}'), headers={'Accept': 'text/html'})
-    assert response.status_code == 200
-    pretty_response = (
-        '{\n'
-        '  "data": {\n'
-        '    "test": "Hello World"\n'
-        '  }\n'
-        '}'
-    ).replace("\"", "\\\"").replace("\n", "\\n")
+@pytest.mark.asyncio
+async def test_graphiql_renders_pretty(
+    app: Quart, client: QuartClient
+) -> typing.NoReturn:
+    async with app.test_request_context("/"):
+        response = await client.get(
+            url_for("graphql", query="{test}"), headers={"Accept": "text/html"}
+        )
+        assert response.status_code == 200
+        pretty_response = (
+            '{\n'
+            '  "data": {\n'
+            '    "test": "Hello World"\n'
+            '  }\n'
+            '}'
+        ).replace("\"", "\\\"").replace("\n", "\\n")
+        assert pretty_response in str(await response.get_data(), 'utf-8')
 
-    assert pretty_response in response.data.decode('utf-8')
+
+@pytest.mark.asyncio
+async def test_graphiql_default_title(
+    app: Quart, client: QuartClient
+) -> typing.NoReturn:
+    async with app.test_request_context("/"):
+        response = await client.get(url_for("graphql"), headers={"Accept": "text/html"})
+        assert "<title>GraphiQL</title>" in str(await response.get_data())
 
 
-def test_graphiql_default_title(client):
-    response = client.get(url_for('graphql'), headers={'Accept': 'text/html'})
-    assert '<title>GraphiQL</title>' in response.data.decode('utf-8')
-
-
-@pytest.mark.parametrize('app', [create_app(graphiql=True, graphiql_html_title="Awesome")])
-def test_graphiql_custom_title(client):
-    response = client.get(url_for('graphql'), headers={'Accept': 'text/html'})
-    assert '<title>Awesome</title>' in response.data.decode('utf-8')
+@pytest.mark.parametrize(
+    "app", [create_app(graphiql=True, graphiql_html_title="Awesome")]
+)
+@pytest.mark.asyncio
+async def test_graphiql_custom_title(
+    app: Quart, client: QuartClient
+) -> typing.NoReturn:
+    async with app.test_request_context("/"):
+        response = await client.get(url_for("graphql"), headers={"Accept": "text/html"})
+        data = str(await response.get_data())
+        assert "<title>Awesome</title>" in data
